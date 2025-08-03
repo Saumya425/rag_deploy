@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repo
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -38,4 +38,4 @@ jobs:
             --name ${{ secrets.CONTAINER_APP_NAME }} \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             --image $IMAGE \
-            --env-vars "FASTAPI_URL=${{ secrets.FASTAPI_URL }}"
+            --set-env-vars FASTAPI_URL=${{ secrets.FASTAPI_URL }}
