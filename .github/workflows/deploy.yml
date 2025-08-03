@@ -1,4 +1,4 @@
-name: Deploy Streamlit to Azure
+name: Deploy Streamlit to Azure Container Apps
 
 on:
   push:
@@ -7,17 +7,23 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
+    steps:
+      # Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Log in to Azure using service principal JSON from GitHub secret
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # Log in to Azure Container Registry (ACR)
       - name: Docker login to ACR
         run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
 
+      # Build and push Docker image
       - name: Build and Push Docker image
         run: |
           IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/streamlit-app:${{ github.sha }}
@@ -25,10 +31,11 @@ jobs:
           docker push $IMAGE
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
+      # Deploy to Azure Container App
       - name: Deploy to Container App
         run: |
           az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME }} \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             --image $IMAGE \
-            --env-vars FASTAPI_URL=${{ secrets.FASTAPI_URL }}
+            --env-vars "FASTAPI_URL=${{ secrets.FASTAPI_URL }}"
