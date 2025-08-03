@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import requests
 
+
 API_BASE = os.getenv("FASTAPI_URL", "https://niti-rag.azurewebsites.net")
 
 st.set_page_config(page_title="NITI RAG QA", layout="centered")
